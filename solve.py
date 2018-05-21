@@ -52,66 +52,87 @@ SYMBOLS = {
 }
 
 
-def _generate(num, remaining):
-    if len(remaining) == 1:
-        for name in OPERATIONS:
-            yield (name, num, remaining[0])
-            yield (name, remaining[0], num)
+def _get_groupings(nums):
+    if len(nums) == 1:
+        yield nums[0]
+    elif len(nums) == 2:
+        yield nums
     else:
+        for i in range(1, len(nums)):
+            x, y = nums[:i], nums[i:]
+            for xx in _get_groupings(x):
+                for yy in _get_groupings(y):
+                    yield (xx, yy)
+
+
+def get_groupings(perms):
+    for nums in perms:
+        yield from _get_groupings(nums)
+
+
+def _generate_candidates(nums):
+    x, y = nums[0], nums[1]
+    if not isinstance(x, tuple) and not isinstance(y, tuple):
         for name in OPERATIONS:
-            for x in _generate(remaining[0], remaining[1:]):
-                yield (name, num, x)
-                yield (name, x, num)
+            yield (name, x, y)
+    else:
+        x_gens = [x] if not isinstance(x, tuple) else _generate_candidates(x)
+        y_gens = [y] if not isinstance(y, tuple) else _generate_candidates(y)
+        for a in x_gens:
+            for b in y_gens:
+                for name in OPERATIONS:
+                    yield (name, a, b)
 
 
-def generate_formulas(numbers):
-    all_permutations = (
-        x for r in range(2, len(numbers) + 1) for x in permutations(numbers, r)
+def generate_candidates(numbers):
+    all_permutations = chain(
+        (x for r in range(2, len(numbers) + 1) for x in permutations(numbers, r))
     )
-    return chain(*(_generate(c[0], c[1:]) for c in all_permutations))
+
+    for g in get_groupings(all_permutations):
+        yield from _generate_candidates(g)
 
 
-@functools.lru_cache()
-def _compute(formula):
-    name, x, y = formula
+def _compute(candidate):
+    name, x, y = candidate
     child_x, child_y = x, y
     child_x = _compute(x)[1] if isinstance(x, tuple) else x
     child_y = _compute(y)[1] if isinstance(y, tuple) else y
-    return formula, OPERATIONS[name](child_x, child_y)
+    return candidate, OPERATIONS[name](child_x, child_y)
 
 
-def compute(formulas, final_result):
-    best_formula, best_result, exact_found = None, 0, False
-    for formula in formulas:
+def compute(candidates, final_result):
+    best_candidate, best_result, exact_found = None, 0, False
+    for candidate in candidates:
         try:
-            n, r = _compute(formula)
+            n, r = _compute(candidate)
         except (ValueError, ZeroDivisionError, TypeError, OverflowError):
             continue
         if abs(r - final_result) < abs(best_result - final_result):
-            best_formula, best_result = n, r
+            best_candidate, best_result = n, r
         if r == final_result:
             exact_found = True
             yield r, n
     if not exact_found:
-        yield best_result, best_formula
+        yield best_result, best_candidate
 
 
-def parse(formula, bracket=True):
-    name, x, y = formula
+def parse(candidate, bracket=True):
+    name, x, y = candidate
     symbol = SYMBOLS[name]
     child_x = parse(x) if isinstance(x, tuple) else str(x)
     child_y = parse(y) if isinstance(y, tuple) else str(y)
-    formula = f" {symbol} ".join([child_x, child_y])
+    result = f" {symbol} ".join([child_x, child_y])
     if bracket:
-        return f"({formula})"
-    return formula
+        return f"({result})"
+    return result
 
 
 # Example usage:
-#
-# if __name__ == "__main__":
-#     input_numbers = (75, 25, 50, 100, 8, 2)
-#     target = 431
-#     for (x, y) in compute(generate_formulas(input_numbers), target):
-#         expr = parse(y, False)
-#         print(f"{expr} = {x}")
+
+if __name__ == "__main__":
+    input_numbers = (7, 2, 9, 7)
+    target = 211
+    for (x, y) in compute(generate_candidates(input_numbers), target):
+        expr = parse(y, False)
+        print(f"{expr} = {x}")
