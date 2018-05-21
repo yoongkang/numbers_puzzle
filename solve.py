@@ -94,19 +94,19 @@ def generate_candidates(numbers):
 
 
 @functools.lru_cache()
-def _compute(candidate):
+def compute(candidate):
     name, x, y = candidate
     child_x, child_y = x, y
-    child_x = _compute(x)[1] if isinstance(x, tuple) else x
-    child_y = _compute(y)[1] if isinstance(y, tuple) else y
+    child_x = compute(x)[1] if isinstance(x, tuple) else x
+    child_y = compute(y)[1] if isinstance(y, tuple) else y
     return candidate, OPERATIONS[name](child_x, child_y)
 
 
-def compute(candidates, final_result):
+def get_best_candidates(candidates, final_result):
     best_candidate, best_result, exact_found = None, 0, False
     for candidate in candidates:
         try:
-            n, r = _compute(candidate)
+            n, r = compute(candidate)
         except (ValueError, ZeroDivisionError, TypeError, OverflowError):
             continue
         if abs(r - final_result) < abs(best_result - final_result):
