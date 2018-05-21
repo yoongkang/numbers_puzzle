@@ -130,9 +130,9 @@ def parse(candidate, bracket=True):
 
 # Example usage:
 
-if __name__ == "__main__":
-    input_numbers = (7, 2, 9, 7)
-    target = 211
-    for (x, y) in compute(generate_candidates(input_numbers), target):
-        expr = parse(y, False)
-        print(f"{expr} = {x}")
+# if __name__ == "__main__":
+#     input_numbers = (7, 2, 9, 7)
+#     target = 211
+#     for (x, y) in compute(generate_candidates(input_numbers), target):
+#         expr = parse(y, False)
+#         print(f"{expr} = {x}")
