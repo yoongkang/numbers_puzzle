@@ -93,6 +93,7 @@ def generate_candidates(numbers):
         yield from _generate_candidates(g)
 
 
+@functools.lru_cache()
 def _compute(candidate):
     name, x, y = candidate
     child_x, child_y = x, y
