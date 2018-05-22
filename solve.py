@@ -1,6 +1,6 @@
 import math
 import operator
-from itertools import permutations, chain
+from itertools import permutations
 import functools
 
 
@@ -85,8 +85,8 @@ def _generate_candidates(nums):
 
 
 def generate_candidates(numbers):
-    all_permutations = chain(
-        (x for r in range(2, len(numbers) + 1) for x in permutations(numbers, r))
+    all_permutations = (
+        x for r in range(2, len(numbers) + 1) for x in permutations(numbers, r)
     )
 
     for g in get_groupings(all_permutations):
