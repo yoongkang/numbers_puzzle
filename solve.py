@@ -58,11 +58,12 @@ def _get_groupings(nums):
     elif len(nums) == 2:
         yield nums
     else:
-        for i in range(1, len(nums)):
-            x, y = nums[:i], nums[i:]
-            for xx in _get_groupings(x):
-                for yy in _get_groupings(y):
-                    yield (xx, yy)
+        yield from (
+            (xx, yy)
+            for i in range(1, len(nums))
+            for xx in _get_groupings(nums[:i])
+            for yy in _get_groupings(nums[i:])
+        )
 
 
 def get_groupings(perms):
@@ -78,10 +79,7 @@ def _generate_candidates(nums):
     else:
         x_gens = [x] if not isinstance(x, tuple) else _generate_candidates(x)
         y_gens = [y] if not isinstance(y, tuple) else _generate_candidates(y)
-        for a in x_gens:
-            for b in y_gens:
-                for name in OPERATIONS:
-                    yield (name, a, b)
+        yield from ((name, a, b) for a in x_gens for b in y_gens for name in OPERATIONS)
 
 
 def generate_candidates(numbers):
