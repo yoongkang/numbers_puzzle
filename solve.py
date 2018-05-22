@@ -79,7 +79,9 @@ def _generate_candidates(nums):
     else:
         x_gens = [x] if not isinstance(x, tuple) else _generate_candidates(x)
         y_gens = [y] if not isinstance(y, tuple) else _generate_candidates(y)
-        yield from ((name, a, b) for a in x_gens for b in y_gens for name in OPERATIONS)
+        yield from (
+            (name, a, b) for a in x_gens for b in y_gens for name in OPERATIONS
+        )
 
 
 def generate_candidates(numbers):
@@ -128,10 +130,10 @@ def parse(candidate, bracket=True):
 
 
 # Example usage:
-
+#
 # if __name__ == "__main__":
 #     input_numbers = (7, 2, 9, 7)
 #     target = 211
-#     for (x, y) in compute(generate_candidates(input_numbers), target):
+#     for (x, y) in get_best_candidates(generate_candidates(input_numbers), target):
 #         expr = parse(y, False)
 #         print(f"{expr} = {x}")
